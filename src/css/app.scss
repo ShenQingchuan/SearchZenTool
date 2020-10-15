@@ -1,0 +1,31 @@
+// app global css in SCSS form
+::-webkit-scrollbar {
+  width: 0 !important;
+}
+.header-title {
+  font-weight: bold;
+  font-size: 16px;
+}
+.none-select {
+  user-select: none;
+}
+.content-inputer,
+.links-card {
+  width: 80vw;
+  margin: 10px 0;
+}
+.hotkey-chip {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+@font-face {
+  font-family: 'Nunito';
+  src: url('../../public/fonts/Nunito-Regular.ttf') format('truetype');
+  font-weight: normal;
+}
+@font-face {
+  font-family: 'Nunito';
+  src: url('../../public/fonts/Nunito-Bold.ttf') format('truetype');
+  font-weight: bold;
+}
