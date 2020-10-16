@@ -7,7 +7,7 @@ import routes from './routes';
  * directly export the Router instantiation
  */
 
-export default route(function ({ Vue }) {
+export default route(function({ Vue }) {
   Vue.use(VueRouter);
 
   const Router = new VueRouter({
@@ -22,4 +22,4 @@ export default route(function ({ Vue }) {
   });
 
   return Router;
-})
+});

@@ -1,5 +1,5 @@
 <template>
-  <q-page class="page-index column items-center justify-start">
+  <q-page class="page-index nunito-font column items-center justify-start">
     <q-input
       class="content-inputer"
       standout="bg-primary text-white"
@@ -13,7 +13,7 @@
     <q-card class="links-card">
       <q-card-section>
         <q-chip
-          v-for="link in linksConfig"
+          v-for="link in linksList"
           :key="link.name"
           clickable
           color="primary"
@@ -65,8 +65,12 @@
 </template>
 
 <script lang="ts">
+import fs from 'fs';
+import path from 'path';
 import { defineComponent, ref } from '@vue/composition-api';
-import { ISearchZenLink, defaultLinksConfig } from 'boot/search-zen-link';
+import { ISearchZenLink, defaultTemplates } from '../utils/search-zen-link';
+import initWindow from 'src/utils/init-window';
+import {readSettings} from 'src/utils/read-write-settings';
 
 export default defineComponent({
   name: 'PageIndex',
@@ -76,11 +80,11 @@ export default defineComponent({
       focusInput: false,
       pasteConfirmDialogShow: false,
       selectedLink: undefined,
-      linksConfig: [...defaultLinksConfig]
+      linksList: [] as ISearchZenLink[]
     };
   },
   mounted() {
-    const electronInstance = this.$q.electron;
+    const electronInstance = initWindow(this, 400, 460);
 
     const gotFromClipboard = electronInstance.clipboard.readText();
     if (gotFromClipboard.length) {
@@ -88,6 +92,10 @@ export default defineComponent({
         this.pasteConfirmDialogShow = true;
       }
     }
+
+    readSettings(electronInstance, data => {
+      this.linksList = JSON.parse(String(data)).templates;
+    });
   },
   methods: {
     onLinkClick(link: string) {
@@ -107,9 +115,3 @@ export default defineComponent({
   }
 });
 </script>
-
-<style scoped>
-.page-index {
-  font-family: 'Nunito', sans-serif;
-}
-</style>

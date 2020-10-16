@@ -1,7 +1,7 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-header elevated class="none-select q-electron-drag">
-      <q-toolbar>
+      <q-toolbar class="q-electron-drag">
         <q-btn
           flat
           dense
@@ -15,7 +15,16 @@
           Search-Zen 极速搜索
         </q-toolbar-title>
 
-        <div>Quasar v{{ $q.version }}</div>
+        <div v-if="$route.path === '/'">Quasar v{{ $q.version }}</div>
+        <q-btn
+          v-else
+          flat
+          color="white"
+          dense
+          @click="$router.go(-1)"
+          icon="keyboard_arrow_left"
+          >返回</q-btn
+        >
       </q-toolbar>
     </q-header>
 
@@ -55,7 +64,7 @@ const sidebarLinksData = [
   }
 ];
 
-import { defineComponent, ref } from '@vue/composition-api';
+import { defineComponent, onMounted, ref } from '@vue/composition-api';
 
 export default defineComponent({
   name: 'MainLayout',

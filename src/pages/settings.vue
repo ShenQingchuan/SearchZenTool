@@ -1,7 +1,7 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
-      <q-toolbar>
+      <q-toolbar class="q-electron-drag">
         <q-icon name="settings" />
         <q-toolbar-title class="header-title">
           设置
@@ -10,16 +10,16 @@
           flat
           color="white"
           icon="keyboard_arrow_left"
-          @click="$router.go(-1)"
+          @click="$router.push('/#/')"
         >
-          返回
+          返回首页
         </q-btn>
       </q-toolbar>
     </q-header>
 
     <q-page-container>
       <q-page class="page-settings column items-center justify-start">
-        <q-form @submit="onSubmit" @reset="onReset" class="q-gutter-md">
+        <q-form class="q-gutter-md">
           <q-input
             filled
             v-model="name"
@@ -42,13 +42,12 @@
           <q-input filled v-model="desc" label="搜索项描述" />
 
           <div>
-            <q-btn label="保存" color="primary" @click="saveToLocalJSONFile" />
-            <q-btn
-              label="查看当前所有模板"
-              color="primary"
-              flat
-              class="q-ml-sm"
-            />
+            <q-btn label="保存" color="primary" @click="saveNewTemplate" />
+            <q-btn color="primary" flat class="q-ml-sm">
+              <a href="/#/templates" class="plain-a text-primary"
+                >查看所有模板</a
+              >
+            </q-btn>
           </div>
         </q-form>
       </q-page>
@@ -57,7 +56,12 @@
 </template>
 
 <script lang="ts">
+import fs from 'fs';
+import path from 'path';
 import { defineComponent } from '@vue/composition-api';
+import { defaultTemplates } from '../utils/search-zen-link';
+import initWindow from 'src/utils/init-window';
+import { appendSettings } from 'src/utils/read-write-settings';
 
 export default defineComponent({
   name: 'PageSettings',
@@ -65,13 +69,21 @@ export default defineComponent({
     return {
       name: '',
       template: '',
-      desc: '',
-      linksList: [],
-      linksListShow: false
+      desc: ''
     };
   },
+  mounted() {
+    initWindow(this, 400, 460);
+  },
   methods: {
-    saveToLocalJSONFile() {}
+    saveNewTemplate() {
+      this.$rlogger.info('Starting save new template to local JSON file.');
+      appendSettings(this.$q.electron, {
+        name: this.name,
+        template: this.template,
+        desc: this.desc
+      });
+    }
   }
 });
 </script>
@@ -83,5 +95,9 @@ export default defineComponent({
     width: 80vw;
     margin: 6px auto;
   }
+}
+.plain-a {
+  margin: 0;
+  text-decoration: none;
 }
 </style>

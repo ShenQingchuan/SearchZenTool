@@ -1,4 +1,5 @@
-import { app, BrowserWindow, globalShortcut, Menu, nativeTheme, Tray } from 'electron'
+import { app, BrowserWindow, globalShortcut, ipcMain, Menu, nativeTheme, Tray } from 'electron'
+import { openDevTools } from 'electron-debug'
 import logger from './logger'
 
 try {
@@ -55,14 +56,17 @@ function reShowWindow() {
     createWindow() // 新建窗口实例
   } else if (!mainWindow.isVisible()) {
     // 重新显示
-    mainWindow.reload()
     mainWindow.show()
   }
 }
 function registerKeyboardShortcut() {
   globalShortcut.register('Shift + Alt + Enter', () => {
-    reShowWindow()
-    mainWindow.moveTop()
+    if (mainWindow.isVisible()) {
+      mainWindow.hide()
+    } else {
+      reShowWindow()
+      mainWindow.moveTop()
+    }
   })
 }
 
@@ -82,6 +86,15 @@ app.on('activate', reShowWindow)
 app.whenReady().then(_ => {
   tray = new Tray(require('path').resolve(__statics, 'icons/favicon-32x32.png'))
   const trayMenu = Menu.buildFromTemplate([{
+    label: '显示主窗口',
+    click: reShowWindow
+  }, {
+    label: '启用开发者模式',
+    click() {
+      reShowWindow()
+      openDevTools()
+    }
+  }, {
     label: '退出 Search Zen',
     click() { app.quit(); }
   }])

@@ -1,12 +1,16 @@
 <template>
-  <div class="fullscreen bg-blue text-white text-center q-pa-md flex flex-center">
+  <div
+    class="fullscreen bg-white text-black text-center q-pa-md flex flex-center"
+  >
     <div>
-      <div style="font-size: 30vh">
-        404
-      </div>
+      <q-icon
+        color="black"
+        name="no_transfer"
+        style="font-size: 20vh; margin-bottom: 30px;"
+      />
 
-      <div class="text-h2" style="opacity:.4">
-        Oops. Nothing here...
+      <div class="text-h5">
+        OOPS，这里什么都没有...
       </div>
 
       <q-btn
@@ -15,7 +19,7 @@
         text-color="blue"
         unelevated
         to="/"
-        label="Go Home"
+        label="返回搜索页"
         no-caps
       />
     </div>
@@ -26,6 +30,6 @@
 import { defineComponent } from '@vue/composition-api';
 
 export default defineComponent({
-  name: 'Error404',
+  name: 'Error404'
 });
 </script>
