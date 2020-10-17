@@ -55,7 +55,6 @@ import initWindow from 'src/utils/init-window';
 import {
   readSettings,
   rewriteSettings,
-  SettingsObjectType
 } from 'src/utils/read-write-settings';
 import { ISearchZenLink } from 'src/utils/search-zen-link';
 
@@ -95,9 +94,7 @@ export default defineComponent({
     reload() {
       initWindow(this.$q.electron, 900, 460);
       readSettings(this.$q.electron, data => {
-        this.linksList = (JSON.parse(
-          String(data)
-        ) as SettingsObjectType).templates;
+        this.linksList = data.templates;
       });
     },
     // eslint-disable-next-line

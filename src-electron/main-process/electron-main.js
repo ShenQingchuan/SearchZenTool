@@ -99,7 +99,7 @@ app.on('activate', reShowWindow);
 
 void app.whenReady().then(_ => {
   tray = new Tray(
-    require('path').resolve(__statics, 'icons/favicon-32x32.png')
+    require('path').resolve(__statics, 'icons/favicon-16x16.png')
   );
   const trayMenu = Menu.buildFromTemplate([
     {

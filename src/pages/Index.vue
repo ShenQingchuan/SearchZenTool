@@ -80,7 +80,6 @@ import { defineComponent } from '@vue/composition-api';
 import { ISearchZenLink } from '../utils/search-zen-link';
 import {
   readSettings,
-  SettingsObjectType
 } from 'src/utils/read-write-settings';
 import initWindow from 'src/utils/init-window';
 
@@ -109,9 +108,8 @@ export default defineComponent({
     });
 
     readSettings(electronInstance, data => {
-      this.linksList = (JSON.parse(
-        String(data)
-      ) as SettingsObjectType).templates;
+      console.log(String(data));
+      this.linksList = data.templates;
     });
   },
   methods: {

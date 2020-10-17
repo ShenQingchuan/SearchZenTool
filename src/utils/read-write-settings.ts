@@ -9,7 +9,7 @@ export type SettingsObjectType = {
 
 export function readSettings(
   electronInstance: typeof Electron,
-  loadedCallback: (data: Buffer, settingsFilePath: string) => void
+  loadedCallback: (data: SettingsObjectType, settingsFilePath: string) => void
 ) {
   const appPath = electronInstance.remote.app.getAppPath();
   logger.info(`current App path - ${appPath}`);
@@ -19,22 +19,18 @@ export function readSettings(
     if (err) {
       // 检测到文件不存在 创建文件
       logger.warn('Settings JSON file may not found, Creating ...');
-      fs.writeFileSync(
-        settingsFilePath,
-        JSON.stringify(
-          {
-            templates: defaultTemplates
-          },
-          null,
-          2
-        ),
-        { encoding: 'utf-8' }
-      );
+      const dataObj = {
+        templates: defaultTemplates
+      };
+      fs.writeFileSync(settingsFilePath, JSON.stringify(dataObj, null, 2), {
+        encoding: 'utf-8'
+      });
       logger.info('Write default templates in new settings.json.');
+      loadedCallback(dataObj, settingsFilePath);
+    } else {
+      // 读取到文件内容，执行回调
+      loadedCallback(JSON.parse(String(data)), settingsFilePath);
     }
-
-    // 读取到文件内容，执行回调
-    loadedCallback(data, settingsFilePath);
   });
 }
 
@@ -44,8 +40,8 @@ export function appendSettings(
   successCallback: () => void,
   duplicateCallback: () => void
 ): void {
-  readSettings(electronInstance, (buffer, settingsFilePath) => {
-    const settingsObject = JSON.parse(String(buffer)) as SettingsObjectType;
+  readSettings(electronInstance, (data, settingsFilePath) => {
+    const settingsObject = data;
 
     // 检查是否有该模板记录: name + template 作关键字
     for (const existlink of settingsObject.templates) {
@@ -76,8 +72,8 @@ export function rewriteSettings(
   electronInstance: typeof Electron,
   newTemplates: ISearchZenLink[]
 ) {
-  readSettings(electronInstance, (buffer, settingsFilePath) => {
-    const settingsObject = JSON.parse(String(buffer)) as SettingsObjectType;
+  readSettings(electronInstance, (data, settingsFilePath) => {
+    const settingsObject = data;
     settingsObject.templates = newTemplates;
 
     fs.writeFile(
