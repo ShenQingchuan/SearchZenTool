@@ -1,3 +1,5 @@
+import { VueConstructor } from 'vue';
+
 export type LoggerFuncType = (message: string) => void;
 export type Logger = {
   [key: string]: LoggerFuncType;
@@ -17,7 +19,8 @@ usualLoggerLevels.forEach(level => {
 
 function createLoggerPlugin() {
   return {
-    install: (Vue: any) => {
+    install: (Vue: VueConstructor) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       Vue.prototype.$rlogger = logger;
     }
   };

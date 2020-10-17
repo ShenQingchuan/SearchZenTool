@@ -21,9 +21,13 @@ export function readSettings(
       logger.warn('Settings JSON file may not found, Creating ...');
       fs.writeFileSync(
         settingsFilePath,
-        JSON.stringify({
-          templates: defaultTemplates
-        }),
+        JSON.stringify(
+          {
+            templates: defaultTemplates
+          },
+          null,
+          2
+        ),
         { encoding: 'utf-8' }
       );
       logger.info('Write default templates in new settings.json.');
@@ -36,16 +40,54 @@ export function readSettings(
 
 export function appendSettings(
   electronInstance: typeof Electron,
-  newLink: ISearchZenLink
+  newLink: ISearchZenLink,
+  successCallback: () => void,
+  duplicateCallback: () => void
+): void {
+  readSettings(electronInstance, (buffer, settingsFilePath) => {
+    const settingsObject = JSON.parse(String(buffer)) as SettingsObjectType;
+
+    // 检查是否有该模板记录: name + template 作关键字
+    for (const existlink of settingsObject.templates) {
+      if (
+        existlink.name === newLink.name &&
+        existlink.template === newLink.template
+      ) {
+        return duplicateCallback(); // 名称和网址都雷同，则不添加该记录
+      }
+    }
+
+    settingsObject.templates.push(newLink);
+    fs.writeFile(
+      settingsFilePath,
+      JSON.stringify(settingsObject, null, 2),
+      err => {
+        if (err) {
+          logger.error('Writing settings JSON file failed !');
+        }
+
+        successCallback();
+      }
+    );
+  });
+}
+
+export function rewriteSettings(
+  electronInstance: typeof Electron,
+  newTemplates: ISearchZenLink[]
 ) {
   readSettings(electronInstance, (buffer, settingsFilePath) => {
-    let settingsObject: SettingsObjectType = JSON.parse(String(buffer));
-    settingsObject.templates.push(newLink);
+    const settingsObject = JSON.parse(String(buffer)) as SettingsObjectType;
+    settingsObject.templates = newTemplates;
 
-    fs.writeFile(settingsFilePath, JSON.stringify(settingsObject), err => {
-      if (err) {
-        logger.error('Write settings JSON file failed !');
+    fs.writeFile(
+      settingsFilePath,
+      JSON.stringify(settingsObject, null, 2),
+      err => {
+        if (err) {
+          logger.error('Writing settings JSON file failed !');
+        }
       }
-    });
+    );
   });
 }

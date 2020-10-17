@@ -15,6 +15,16 @@
           Search-Zen 极速搜索
         </q-toolbar-title>
 
+        <q-btn
+          v-if="$route.path === '/templates'"
+          flat
+          color="white"
+          dense
+          @click="$router.push('/settings')"
+          icon="control_point"
+        >
+          <span style="margin-left: 4px;">添加新模板</span>
+        </q-btn>
         <div v-if="$route.path === '/'">Quasar v{{ $q.version }}</div>
         <q-btn
           v-else
@@ -59,12 +69,18 @@ const sidebarLinksData = [
   {
     title: '新增搜索项',
     caption: '在此添加网址模板',
-    icon: 'settings',
+    icon: 'control_point',
     link: '/#/settings'
+  },
+  {
+    title: '模板列表',
+    caption: '查看已保存的模板',
+    icon: 'table_view',
+    link: '/#/templates'
   }
 ];
 
-import { defineComponent, onMounted, ref } from '@vue/composition-api';
+import { defineComponent, ref } from '@vue/composition-api';
 
 export default defineComponent({
   name: 'MainLayout',

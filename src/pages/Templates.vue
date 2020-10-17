@@ -4,42 +4,60 @@
       class="templates-table"
       :data="linksList"
       :columns="columns"
-      title="已保存的链接模板"
       row-key="name"
+      rows-per-page-label="每页项数："
     >
+      <template v-slot:top>
+        <div class="col q-table__title">已保存的链接模板</div>
+        <div class="col-8 text-right text-primary none-select">
+          点击表项弹出编辑框，敲击回车确认保存
+        </div>
+      </template>
+
       <template v-slot:body="props">
         <q-tr :props="props">
-          <q-td key="name" :props="props">
-            {{ props.row.name }}
-            <q-popup-edit v-model="props.row.name" title="编辑搜索项名称">
-              <q-input v-model="props.row.name" dense autofocus />
+          <q-td
+            v-for="colName in ['name', 'template', 'desc']"
+            :key="colName"
+            :props="props"
+          >
+            {{ props.row[colName] }}
+            <q-popup-edit
+              v-model="props.row[colName]"
+              title="编辑搜索项名称"
+              @save="onItemSave"
+            >
+              <q-input v-model="props.row[colName]" dense autofocus />
             </q-popup-edit>
           </q-td>
-          <q-td key="template" :props="props">
-            {{ props.row.template }}
-            <q-popup-edit v-model="props.row.template" title="编辑模板">
-              <q-input v-model="props.row.template" dense autofocus />
-            </q-popup-edit>
-          </q-td>
-          <q-td key="desc" :props="props">
-            {{ props.row.desc }}
-            <q-popup-edit v-model="props.row.desc" title="编辑描述">
-              <q-input v-model="props.row.desc" dense autofocus />
-            </q-popup-edit>
-          </q-td>
+          <q-btn
+            flat
+            class="delete-btn"
+            color="primary"
+            icon="delete"
+            @click="onItemDelete(props.row)"
+          />
         </q-tr>
+      </template>
+
+      <template v-slot:no-data>
+        <q-btn flat dense color="primary" icon="refresh" @click="reload"
+          >读取本地模板配置文件出错啦！点击重试</q-btn
+        >
       </template>
     </q-table>
   </q-page>
 </template>
 
 <script lang="ts">
-import fs from 'fs';
-import path from 'path';
 import { defineComponent } from '@vue/composition-api';
-import { defaultTemplates } from '../utils/search-zen-link';
 import initWindow from 'src/utils/init-window';
-import { readSettings } from 'src/utils/read-write-settings';
+import {
+  readSettings,
+  rewriteSettings,
+  SettingsObjectType
+} from 'src/utils/read-write-settings';
+import { ISearchZenLink } from 'src/utils/search-zen-link';
 
 const columns = [
   {
@@ -65,15 +83,37 @@ const columns = [
 export default defineComponent({
   data() {
     return {
-      linksList: [],
+      selected: [] as ISearchZenLink[],
+      linksList: [] as ISearchZenLink[],
       columns
     };
   },
   mounted() {
-    const electronInstance = initWindow(this, 900, 460);
-    readSettings(electronInstance, data => {
-      this.linksList = JSON.parse(String(data)).templates;
-    });
+    this.reload();
+  },
+  methods: {
+    reload() {
+      initWindow(this.$q.electron, 900, 460);
+      readSettings(this.$q.electron, data => {
+        this.linksList = (JSON.parse(
+          String(data)
+        ) as SettingsObjectType).templates;
+      });
+    },
+    // eslint-disable-next-line
+    onItemSave(value: any, initialValue: any) {
+      this.$rlogger.info('Rewrite from pop-up editing');
+      rewriteSettings(this.$q.electron, this.linksList);
+    },
+    onItemDelete(target: ISearchZenLink) {
+      this.$rlogger.info(JSON.stringify(target));
+      this.linksList.forEach((item, i) => {
+        if (item.name === target.name) {
+          this.linksList.splice(i, 1);
+        }
+      });
+      rewriteSettings(this.$q.electron, this.linksList);
+    }
   }
 });
 </script>
@@ -82,5 +122,8 @@ export default defineComponent({
 .templates-table {
   width: 90vw;
   margin: 30px auto;
+}
+.delete-btn {
+  height: 48px;
 }
 </style>

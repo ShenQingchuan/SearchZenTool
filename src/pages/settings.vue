@@ -56,10 +56,7 @@
 </template>
 
 <script lang="ts">
-import fs from 'fs';
-import path from 'path';
 import { defineComponent } from '@vue/composition-api';
-import { defaultTemplates } from '../utils/search-zen-link';
 import initWindow from 'src/utils/init-window';
 import { appendSettings } from 'src/utils/read-write-settings';
 
@@ -73,16 +70,38 @@ export default defineComponent({
     };
   },
   mounted() {
-    initWindow(this, 400, 460);
+    initWindow(this.$q.electron, 400, 460);
   },
   methods: {
     saveNewTemplate() {
       this.$rlogger.info('Starting save new template to local JSON file.');
-      appendSettings(this.$q.electron, {
-        name: this.name,
-        template: this.template,
-        desc: this.desc
-      });
+      appendSettings(
+        this.$q.electron,
+        {
+          name: this.name,
+          template: this.template,
+          desc: this.desc
+        },
+        () => {
+          this.$q.dialog({
+            title: '添加成功',
+            message: `已将 ${this.name} 添加到模板列表中！`
+          });
+          this.clearForm();
+        },
+        () => {
+          this.$q.dialog({
+            title: '添加失败',
+            message: `${this.name} 同名同网址模板的记录已存在！`
+          });
+          this.clearForm();
+        }
+      );
+    },
+    clearForm() {
+      this.name = '';
+      this.template = '';
+      this.desc = '';
     }
   }
 });

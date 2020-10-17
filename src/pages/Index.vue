@@ -2,12 +2,14 @@
   <q-page class="page-index nunito-font column items-center justify-start">
     <q-input
       class="content-inputer"
-      standout="bg-primary text-white"
       stack-label
       v-model="text"
       label="搜索内容"
       autofocus
       :active="false"
+      filled
+      clearable
+      clear-icon="close"
     />
 
     <q-card class="links-card">
@@ -22,6 +24,15 @@
         >
           <q-avatar color="red" text-color="white" icon="directions" />
           {{ link.name }}
+
+          <q-tooltip
+            v-if="link.desc && link.desc.length > 0"
+            transition-show="scale"
+            transition-hide="scale"
+            max-width="160px"
+          >
+            {{ link.desc }}
+          </q-tooltip>
         </q-chip>
       </q-card-section>
     </q-card>
@@ -65,12 +76,13 @@
 </template>
 
 <script lang="ts">
-import fs from 'fs';
-import path from 'path';
-import { defineComponent, ref } from '@vue/composition-api';
-import { ISearchZenLink, defaultTemplates } from '../utils/search-zen-link';
+import { defineComponent } from '@vue/composition-api';
+import { ISearchZenLink } from '../utils/search-zen-link';
+import {
+  readSettings,
+  SettingsObjectType
+} from 'src/utils/read-write-settings';
 import initWindow from 'src/utils/init-window';
-import {readSettings} from 'src/utils/read-write-settings';
 
 export default defineComponent({
   name: 'PageIndex',
@@ -84,25 +96,30 @@ export default defineComponent({
     };
   },
   mounted() {
-    const electronInstance = initWindow(this, 400, 460);
+    const electronInstance = this.$q.electron;
+    initWindow(electronInstance, 400, 440);
 
-    const gotFromClipboard = electronInstance.clipboard.readText();
-    if (gotFromClipboard.length) {
-      if (!this.pasteConfirmDialogShow) {
-        this.pasteConfirmDialogShow = true;
+    electronInstance.ipcRenderer.on('hotkeyPressed', () => {
+      const gotFromClipboard = electronInstance.clipboard.readText();
+      if (gotFromClipboard.length) {
+        if (!this.pasteConfirmDialogShow) {
+          this.pasteConfirmDialogShow = true;
+        }
       }
-    }
+    });
 
     readSettings(electronInstance, data => {
-      this.linksList = JSON.parse(String(data)).templates;
+      this.linksList = (JSON.parse(
+        String(data)
+      ) as SettingsObjectType).templates;
     });
   },
   methods: {
     onLinkClick(link: string) {
       const url = link.replace('{%s}', this.text);
-      this.$q.electron.shell
+      void this.$q.electron.shell
         .openExternal(url)
-        .then(_ => this.$q.electron.clipboard.clear());
+        .then(() => this.$q.electron.clipboard.clear());
     },
     confirmAutoPaste() {
       this.text = this.$q.electron.clipboard.readText();
