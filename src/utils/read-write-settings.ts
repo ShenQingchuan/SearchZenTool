@@ -11,7 +11,7 @@ export function readSettings(
   electronInstance: typeof Electron,
   loadedCallback: (data: SettingsObjectType, settingsFilePath: string) => void
 ) {
-  const appPath = electronInstance.remote.app.getAppPath();
+  const appPath = electronInstance.remote.app.getPath('userData');
   logger.info(`current App path - ${appPath}`);
 
   const settingsFilePath = path.resolve(appPath, 'settings.json');

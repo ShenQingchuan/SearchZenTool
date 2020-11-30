@@ -20,7 +20,7 @@ try {
       require('path').join(app.getPath('userData'), 'DevTools Extensions')
     );
   }
-} catch (_) {}
+} catch (_) { }
 
 /**
  * Set `__statics` path to static files in production;
@@ -99,7 +99,7 @@ app.on('activate', reShowWindow);
 
 void app.whenReady().then(_ => {
   tray = new Tray(
-    require('path').resolve(__statics, 'icons/favicon-16x16.png')
+    require('path').resolve(__statics, 'favicon-16x16.png')
   );
   const trayMenu = Menu.buildFromTemplate([
     {
